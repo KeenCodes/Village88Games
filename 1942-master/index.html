@@ -1,0 +1,202 @@
+<html>
+<head>
+	<title>1942 Game</title>
+
+<style type="text/css">
+	body{
+		background-color:black;
+	}
+	#container{
+		background: url('background.png');
+		width:1000px;
+		height:550px;
+	}
+	#hero{
+		background: url('1942.gif');
+		background-position: -85px -180px;
+		width:28px;
+		height:28px;
+		position:absolute;
+	}
+	.enemy1{
+		background: url('1942.gif');
+		background-position: -30px -10px;
+		width:28px;
+		height:28px;
+		position:absolute;
+	}
+	.enemy2{
+		background: url('1942.gif');
+		background-position: -60px -10px;
+		width:28px;
+		height:28px;
+		position:absolute;
+
+	}
+	.explode{
+		background: url('1942.gif');
+		background-position: 100px -30px;
+		width:28px;
+		height:28px;
+		position:absolute;
+
+	}
+	.bullets{
+		background: url('1942.gif');
+		background-position: -185px -400px;
+		width:18px;
+		height:18px;
+		position:absolute;
+	}
+	#score{
+		position:absolute;
+		border:10px solid red;
+		top:20px;
+		left:800px;
+		background-color:white;
+		padding:10px;
+		font-size:30px;
+		font-family: Arial;	
+	}
+</style>
+</head>
+<body>
+	<div id='container'>
+		<div id='hero' style='top:500px; left:500px;'></div>
+		<div id='enemies'>
+		</div>
+		<div id='bullets'>
+		</div>	
+	</div>
+	<div id='score'>0</div>
+
+
+<script>
+
+	var hero = {
+		x:500,
+		y:450
+	};
+	var enemies = [{x:200,y:100,z:1},{x:300,y:50,z:2},{x:400,y:20,z:2},{x:500,y:80,z:1},{x:600,y:30,z:2},{x:100,y:90,z:1},{x:700,y:10,z:2}];
+
+	var bullets = [];
+
+	var score = 0;
+
+	function displayHero(){
+		document.getElementById('hero').style["top"] = hero.y +"px";
+		document.getElementById('hero').style["left"] = hero.x +"px";	
+	}
+
+	function displayEnemies(){
+		var output ='';
+		for(var i=0; i<enemies.length; i++){
+			output += "<div class='enemy"+enemies[i].z+"' style='top:"+enemies[i].y+"px; left:"+enemies[i].x+";'></div>";
+			
+		}
+		document.getElementById('enemies').innerHTML=output;
+	
+	}
+	displayEnemies();
+
+	function moveEnemies(){
+		for(var i=0; i<enemies.length; i++){
+			enemies[i].y += 5;
+
+			if(enemies[i].y >530){
+				enemies[i].y = 0;
+				enemies[i].x = Math.random()*1000;
+			}
+		}
+	}
+
+	function displayBullets(){
+		var output ='';
+		for(var i=0; i<bullets.length; i++){
+			output += "<div class='bullets' style='top:"+bullets[i].y+"px; left:"+bullets[i].x+";'></div>";  
+		}
+		document.getElementById('bullets').innerHTML=output;
+
+	}
+
+	function moveBullets(){
+		for(var i=0; i<bullets.length; i++){
+			bullets[i].y -= 5;
+			if(bullets[i].y < 0 ){
+				bullets[i] = bullets[bullets.length-1];
+				bullets.pop(); 
+
+			}
+		}
+
+	}
+
+	function gameLoop(){
+		displayHero();
+		displayEnemies();
+		displayBullets();
+		moveBullets();
+		moveEnemies();
+		detectCollision();
+		detectCollisionOfEnemy();
+		displayScore();
+	}
+
+	function displayScore(){
+		document.getElementById('score').innerHTML=score;
+	}
+
+	function detectCollision(){
+		for(var i=0; i<bullets.length; i++){
+			for(var j=0; j<enemies.length; j++){
+				if(Math.abs(bullets[i].x - enemies[j].x)<15 && Math.abs(bullets[i].y - enemies[j].y)<15){
+					console.log("bullet",i,"enemy",j,"colided");
+					
+					enemies[j] = enemies[enemies.length-1];
+					enemies.pop(); 
+					bullets[i] = bullets[bullets.length-1];
+					bullets.pop(); 
+					score += 10;
+
+				}
+			}
+		}
+	}
+
+	function detectCollisionOfEnemy(){
+		
+			for(var i=0; i<enemies.length; i++){
+				if(Math.abs(enemies[i].x - hero.x)<15 && Math.abs(enemies[i].y - hero.y)<15){
+					console.log("enemy",i,"hero colided");
+					enemies[i] = enemies[enemies.length-1];
+					enemies.pop(); 
+					score -= 500;
+				}
+			}
+		}
+	
+	
+
+	setInterval(gameLoop,30);
+
+	document.onkeydown = function(a){
+		console.log(a.keyCode);
+		if(a.keyCode == 38 && hero.y > 0){
+			hero.y -=10;
+		}else if(a.keyCode == 40 && hero.y < 500){
+			hero.y +=10 ;
+		
+		}else if(a.keyCode == 37 && hero.x > 0){
+			hero.x -=10;
+		
+		}else if(a.keyCode == 39 && hero.x < 1000){
+			hero.x +=10;
+		}else if(a.keyCode == 32){
+			bullets.push({x:hero.x+6,y:hero.y-15})
+		}
+	}
+
+</script>
+
+</body>
+</html>
